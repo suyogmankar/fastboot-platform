@@ -4,12 +4,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import io.platform.fastboot.crds.Database;
-import io.platform.fastboot.services.database.DatabaseProvisioner;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.platform.fastboot.crds.Database;
+import io.platform.fastboot.services.database.DatabaseProvisioner;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

@@ -2,17 +2,13 @@ package io.platform.fastboot.services.database;
 
 import org.springframework.stereotype.Component;
 
-import io.platform.fastboot.crds.Database;
-import io.fabric8.kubernetes.api.model.IntOrString;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.ResourceNotFoundException;
+import io.platform.fastboot.crds.Database;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -51,10 +47,16 @@ public class PostgresProvisioner implements DatabaseProvisioner {
         int port = database.getSpec().getPort();
         String version = database.getSpec().getVersion();
         String secretName = database.getSpec().getSecretName();
+        boolean externalAccess = database.getSpec().isExternalAccess();
 
         log.info("Database provisioning started for PostgreSQL");
         createStatefulSet(database, name, namespace, port, version, secretName);
-        createService(database, name, namespace, port);
+
+        log.info("Creating {} service for {}", externalAccess ? "external LoadBalancer" : "headless", name);
+        Service service = createService(database, name, namespace, port, POSTGRES, externalAccess);
+        client.resource(service).serverSideApply();
+        log.info("{} service created successfully", externalAccess ? "External LoadBalancer" : "Headless");
+
         log.info("Postgres database started successfully");
     }
 
@@ -105,41 +107,7 @@ public class PostgresProvisioner implements DatabaseProvisioner {
             .endSpec()
             .build();
 
-        client.resource(ss).create();
+        client.resource(ss).serverSideApply();
         log.debug("StatefulSet created successfully");
-    }
-
-    private void createService(Database database, String name, String namespace, int port) {
-        log.debug("Creating service for {}", name);
-        Service svc = new ServiceBuilder()
-            .withNewMetadata()
-                .withName(name)
-                .withNamespace(namespace)
-                .withOwnerReferences(owner(database))
-            .endMetadata()
-            .withNewSpec()
-                .withClusterIP("None")
-                    .addToSelector("app", name)
-                    .addNewPort()
-                    .withPort(port)
-                        .withTargetPort(new IntOrString(port))
-                        .withName(POSTGRES)
-                    .endPort()
-            .endSpec()
-            .build();
-
-        client.resource(svc).create();
-        log.debug("Service for database created successfully");
-    }
-
-    private OwnerReference owner(Database database) {
-        return new OwnerReferenceBuilder()
-            .withApiVersion(database.getApiVersion())
-            .withKind(database.getKind())
-            .withName(database.getMetadata().getName())
-            .withUid(database.getMetadata().getUid())
-            .withController(true)
-            .withBlockOwnerDeletion(true)
-            .build();
     }
 }

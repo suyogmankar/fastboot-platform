@@ -11,4 +11,5 @@ public class DatabaseSpec {
     private String version;
     private int port;
     private String secretName;
+    private boolean externalAccess;
 }

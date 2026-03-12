@@ -26,6 +26,8 @@ spec:
                   databases:
                     items:
                       properties:
+                        externalAccess:
+                          type: boolean
                         name:
                           type: string
                         port:

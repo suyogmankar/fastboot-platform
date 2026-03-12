@@ -19,6 +19,8 @@ spec:
         properties:
           spec:
             properties:
+              externalAccess:
+                type: boolean
               name:
                 type: string
               port:
@@ -31,7 +33,18 @@ spec:
                 type: string
             type: object
           status:
+            properties:
+              database:
+                type: string
+              host:
+                type: string
+              port:
+                type: integer
+              secretName:
+                type: string
             type: object
         type: object
     served: true
     storage: true
+    subresources:
+      status: {}

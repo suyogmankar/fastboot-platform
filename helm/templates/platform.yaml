@@ -16,4 +16,5 @@ spec:
         version: {{ .version | quote }}
         port: {{ .port }}
         secretName: {{ .secretName }}
+        externalAccess: {{ .externalAccess }}
     {{- end }}

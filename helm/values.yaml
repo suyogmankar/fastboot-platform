@@ -44,3 +44,4 @@ platformServices:
       version: "15"
       port: 5432
       secretName: postgres-secret
+      externalAccess: true
