@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: idp-operator
+  name: fastboot-operator-sa
   namespace: local
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: idp-operator-role
+  name: fastboot-operator-role
 rules:
-  - apiGroups: ["idp.adesso.launchpad"]
+  - apiGroups: ["io.platform.fastboot"]
     resources: ["platforms","databases"]
     verbs: ["*"]
   - apiGroups: ["apps"]
@@ -22,12 +22,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: idp-operator-binding
+  name: fastboot-operator-binding
 subjects:
   - kind: ServiceAccount
-    name: idp-operator
+    name: fastboot-operator-sa
     namespace: local
 roleRef:
   kind: ClusterRole
-  name: idp-operator-role
+  name: fastboot-operator-role
   apiGroup: rbac.authorization.k8s.io

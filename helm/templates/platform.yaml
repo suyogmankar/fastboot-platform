@@ -1,0 +1,19 @@
+apiVersion: io.platform.fastboot/v1alpha1
+kind: Platform
+metadata:
+  name: {{ .Values.platform.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  name: {{ .Values.platform.name }}
+  stage: {{ .Values.platform.stage }}
+  version: {{ .Values.platform.version }}
+
+  services:
+    databases:
+    {{- range .Values.platformServices.databases }}
+      - name: {{ .name }}
+        type: {{ .type }}
+        version: {{ .version | quote }}
+        port: {{ .port }}
+        secretName: {{ .secretName }}
+    {{- end }}

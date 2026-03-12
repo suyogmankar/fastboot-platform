@@ -103,7 +103,7 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.basedir}/crds</outputDirectory>
+							<outputDirectory>${project.basedir}/helm/crds</outputDirectory>
 							<resources>
 								<resource>
 									<directory>${project.build.outputDirectory}/META-INF/fabric8</directory>

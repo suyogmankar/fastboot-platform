@@ -1,0 +1,46 @@
+appName: fastboot
+
+artifactory:
+  username: ""
+
+rbac:
+  serviceAccountName: fastboot-operator-sa
+  clusterRoleName: fastboot-operator-role
+  clusterRoleBindingName: ClusterRoleBinding
+
+image:
+  repository: fastboot-idp-operator
+  tag: local
+  pullPolicy: Never
+  imagePullSecret: artifactory-secret
+
+deployment:
+  name: fastboot-idp-operator
+  appName: fastboot-operator
+  replicas: 1
+  selectorLabel: fastboot-operator
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "200Mi"
+    limits:
+      cpu: "500m"
+      memory: "500Mi"
+  env:
+    - name: KUBERNETES_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+
+platform:
+  name: fastboot-ipd
+  stage: local
+  version: 1.0.0
+
+platformServices:
+  databases:
+    - name: postgres-db
+      type: postgres
+      version: "15"
+      port: 5432
+      secretName: postgres-secret

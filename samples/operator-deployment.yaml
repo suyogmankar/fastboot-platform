@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: idp-launchpad-operator
+  name: fastboot-idp-operator
   namespace: local
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: idp-launchpad
+      app: fastboot-idp-operator
   template:
     metadata:
       labels:
-        app: idp-launchpad
+        app: fastboot-idp-operator
     spec:
-      serviceAccountName: idp-operator
+      serviceAccountName: fastboot-operator-sa
       containers:
         - name: operator
-          image: idp-launchpad-operator:local
+          image: fastboot-idp-operator:local
           imagePullPolicy: Never

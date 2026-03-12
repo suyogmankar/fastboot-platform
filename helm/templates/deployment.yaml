@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.name }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.deployment.appName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.selectorLabel }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deployment.selectorLabel }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.image.imagePullSecret }}
+      serviceAccountName: {{ .Values.rbac.serviceAccountName }}
+      containers:
+        - name: {{ .Values.deployment.selectorLabel }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          {{- if .Values.deployment.env }}
+          env:
+          {{- range .Values.deployment.env }}
+          - name: {{ .name }}
+            {{- if .value }}
+            value: {{ .value | quote }}
+            {{- else if .valueFrom }}
+            valueFrom:
+              {{- if .valueFrom.fieldRef }}
+              fieldRef:
+                fieldPath: {{ .valueFrom.fieldRef.fieldPath }}
+              {{- else if .valueFrom.secretKeyRef }}
+              secretKeyRef:
+                name: {{ .valueFrom.secretKeyRef.name }}
+                key: {{ .valueFrom.secretKeyRef.key }}
+                {{- if .valueFrom.secretKeyRef.optional }}
+                optional: {{ .valueFrom.secretKeyRef.optional }}
+                {{- end }}
+              {{- else if .valueFrom.configMapKeyRef }}
+              configMapKeyRef:
+                name: {{ .valueFrom.configMapKeyRef.name }}
+                key: {{ .valueFrom.configMapKeyRef.key }}
+                {{- if .valueFrom.configMapKeyRef.optional }}
+                optional: {{ .valueFrom.configMapKeyRef.optional }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+          {{- end }}
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources:
+            requests:
+              cpu: {{ .Values.deployment.resources.requests.cpu }}
+              memory: {{ .Values.deployment.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.deployment.resources.limits.cpu }}
+              memory: {{ .Values.deployment.resources.limits.memory }}

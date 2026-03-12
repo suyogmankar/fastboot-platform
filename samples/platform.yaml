@@ -1,15 +1,15 @@
-apiVersion: idp.adesso.launchpad/v1alpha1
+apiVersion: io.platform.fastboot/v1alpha1
 kind: Platform
 metadata:
-  name: adesso-launchpad
+  name: fastboot-idp
   namespace: local
 spec:
-  name: adesso-launchpad
+  name: fastboot-idp
   stage: local
   version: 1.0.0
   services:
     databases:
-      - name: test-db
+      - name: postgres-db
         type: postgres
         version: "15"
         port: 5432
