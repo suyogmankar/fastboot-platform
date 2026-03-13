@@ -19,6 +19,18 @@ spec:
         properties:
           spec:
             properties:
+              defaults:
+                properties:
+                  database:
+                    properties:
+                      externalAccess:
+                        type: boolean
+                      storage:
+                        type: string
+                      storageClass:
+                        type: string
+                    type: object
+                type: object
               name:
                 type: string
               services:
@@ -33,6 +45,10 @@ spec:
                         port:
                           type: integer
                         secretName:
+                          type: string
+                        storage:
+                          type: string
+                        storageClass:
                           type: string
                         type:
                           type: string

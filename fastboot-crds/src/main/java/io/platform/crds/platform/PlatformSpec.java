@@ -9,5 +9,8 @@ public class PlatformSpec {
     private String name;
     private String stage;
     private String version;
+
+    private PlatformDefaults defaults;
+
     private PlatformServices services;
 }

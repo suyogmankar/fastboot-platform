@@ -8,6 +8,12 @@ spec:
   stage: {{ .Values.platform.stage }}
   version: {{ .Values.platform.version }}
 
+  defaults:
+    database:
+      storage: {{ .Values.platform.defaults.database.storage }}
+      storageClass: {{ .Values.platform.defaults.database.storageClass }}
+      externalAccess: {{ .Values.platform.defaults.database.externalAccess }}
+
   services:
     databases:
     {{- range .Values.platformServices.databases }}
@@ -16,5 +22,19 @@ spec:
         version: {{ .version | quote }}
         port: {{ .port }}
         secretName: {{ .secretName }}
+        {{- if hasKey . "storage" }}
+        storage: {{ .storage }}
+        {{- else }}
+        storage: {{ $.Values.platform.defaults.database.storage }}
+        {{- end }}
+        {{- if hasKey . "storageClass" }}
+        storageClass: {{ .storageClass }}
+        {{- else }}
+        storageClass: {{ $.Values.platform.defaults.database.storageClass }}
+        {{- end }}
+        {{- if hasKey . "externalAccess" }}
         externalAccess: {{ .externalAccess }}
+        {{- else }}
+        externalAccess: {{ $.Values.platform.defaults.database.externalAccess }}
+        {{- end }}
     {{- end }}

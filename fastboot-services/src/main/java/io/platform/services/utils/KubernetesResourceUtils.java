@@ -3,6 +3,7 @@ package io.platform.services.utils;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
+import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
@@ -13,7 +14,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KubernetesResourceUtils {
 
-    public static StatefulSet createStatefulSet(Database database, String name, String namespace, int port, String version, String secretName, String containerName) {
+    private KubernetesResourceUtils() {
+        /* This utility class should not be instantiated */
+    }
+
+    public static StatefulSet createStatefulSet(
+        Database database,
+        String name,
+        String namespace,
+        int port,
+        String version,
+        String secretName,
+        String containerName) {
         log.debug("Creating StatefulSet for {}", name);
         StatefulSet statefulSet = new StatefulSetBuilder()
             .withNewMetadata()
@@ -24,6 +36,10 @@ public class KubernetesResourceUtils {
             .withNewSpec()
                 .withServiceName(name)
                 .withReplicas(1)
+                .withNewPersistentVolumeClaimRetentionPolicy()
+                    .withWhenDeleted("Delete")
+                    .withWhenScaled("Delete")
+                .endPersistentVolumeClaimRetentionPolicy()
                 .withNewSelector()
                     .addToMatchLabels("app", name)
                 .endSelector()
@@ -54,9 +70,26 @@ public class KubernetesResourceUtils {
                             .addNewPort()
                                 .withContainerPort(port)
                             .endPort()
+                            .addNewVolumeMount()
+                                .withName(containerName.concat("-data"))
+                                .withMountPath("/var/lib/postgresql/data")
+                            .endVolumeMount()
                         .endContainer()
                     .endSpec()
                 .endTemplate()
+                .addNewVolumeClaimTemplate()
+                    .withNewMetadata()
+                        .withName(containerName.concat("-data"))
+                    .endMetadata()
+                    .withNewSpec()
+                        .addToAccessModes("ReadWriteOnce")
+                        .withStorageClassName(database.getSpec().getStorageClass())
+                        .withNewResources()
+                            .addToRequests("storage",
+                                new Quantity(database.getSpec().getStorage()))
+                        .endResources()
+                    .endSpec()
+                .endVolumeClaimTemplate()
             .endSpec()
             .build();
 
@@ -64,7 +97,12 @@ public class KubernetesResourceUtils {
         return statefulSet;
     }
 
-    public static Service createHeadlessService(Database database, String name, String namespace, int port, String containerName) {
+    public static Service createHeadlessService(
+        Database database,
+        String name,
+        String namespace,
+        int port,
+        String containerName) {
         return new ServiceBuilder()
             .withNewMetadata()
                 .withName(name + "-headless")
@@ -84,7 +122,13 @@ public class KubernetesResourceUtils {
             .build();
     }
 
-    public static Service createClientService(Database database, String name, String namespace, int port, String containerName, boolean external) {
+    public static Service createClientService(
+        Database database,
+        String name,
+        String namespace,
+        int port,
+        String containerName,
+        boolean external) {
         ServiceBuilder builder = new ServiceBuilder()
             .withNewMetadata()
                 .withName(name)

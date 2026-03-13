@@ -27,6 +27,10 @@ spec:
                 type: integer
               secretName:
                 type: string
+              storage:
+                type: string
+              storageClass:
+                type: string
               type:
                 type: string
               version:

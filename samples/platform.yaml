@@ -7,6 +7,12 @@ spec:
   name: fastboot-idp
   stage: local
   version: 1.0.0
+  defaults:
+    database:
+      storage: 15Gi
+      storageClass: local-path
+      externalAccess: true
+
   services:
     databases:
       - name: postgres-db

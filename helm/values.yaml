@@ -36,6 +36,11 @@ platform:
   name: fastboot-idp
   stage: local
   version: 1.0.0
+  defaults:
+    database:
+      storage: 5Gi
+      storageClass: local-path
+      externalAccess: true
 
 platformServices:
   databases:
@@ -44,4 +49,4 @@ platformServices:
       version: "15"
       port: 5432
       secretName: postgres-secret
-      externalAccess: true
+      storage: 10Gi
