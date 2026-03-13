@@ -7,9 +7,9 @@ import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
-import io.platform.crds.Database;
-import io.platform.crds.Platform;
-import io.platform.crds.specs.DatabaseSpec;
+import io.platform.crds.database.Database;
+import io.platform.crds.platform.Platform;
+import io.platform.crds.database.DatabaseSpec;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

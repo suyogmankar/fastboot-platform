@@ -1,4 +1,4 @@
-package io.platform.crds.specs;
+package io.platform.crds.platform;
 
 import lombok.Getter;
 import lombok.Setter;

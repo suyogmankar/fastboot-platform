@@ -1,7 +1,8 @@
-package io.platform.crds.specs;
+package io.platform.crds.platform;
 
 import java.util.List;
 
+import io.platform.crds.database.DatabaseSpec;
 import lombok.Getter;
 import lombok.Setter;
 

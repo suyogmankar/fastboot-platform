@@ -5,10 +5,10 @@ import org.springframework.stereotype.Component;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
-import io.fabric8.kubernetes.api.model.apps.StatefulSetBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.ResourceNotFoundException;
-import io.platform.crds.Database;
+import io.platform.crds.database.Database;
+import io.platform.services.utils.KubernetesResourceUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,7 +35,7 @@ public class PostgresProvisioner implements DatabaseProvisioner {
             .get();
 
         if (secret == null) {
-            throw new ResourceNotFoundException("Secret " + database.getMetadata().getNamespace() + " not found");
+            throw new ResourceNotFoundException("Secret " + database.getSpec().getSecretName() + " not found");
         }
         return true;
     }
@@ -50,64 +50,17 @@ public class PostgresProvisioner implements DatabaseProvisioner {
         boolean externalAccess = database.getSpec().isExternalAccess();
 
         log.info("Database provisioning started for PostgreSQL");
-        createStatefulSet(database, name, namespace, port, version, secretName);
+        StatefulSet statefulSet = KubernetesResourceUtils.createStatefulSet(database, name, namespace, port, version, secretName, POSTGRES);
+        client.resource(statefulSet).serverSideApply();
 
         log.info("Creating {} service for {}", externalAccess ? "external LoadBalancer" : "headless", name);
-        Service service = createService(database, name, namespace, port, POSTGRES, externalAccess);
+        Service service = KubernetesResourceUtils.createClientService(database, name, namespace, port, POSTGRES, externalAccess);
         client.resource(service).serverSideApply();
+
+        Service headless = KubernetesResourceUtils.createHeadlessService(database, name, namespace, port, POSTGRES);
+        client.resource(headless).serverSideApply();
         log.info("{} service created successfully", externalAccess ? "External LoadBalancer" : "Headless");
 
         log.info("Postgres database started successfully");
-    }
-
-    private void createStatefulSet(Database database, String name, String namespace, int port, String version, String secretName) {
-        log.debug("Creating StatefulSet for {}", name);
-        StatefulSet ss = new StatefulSetBuilder()
-            .withNewMetadata()
-                .withName(name)
-                .withNamespace(namespace)
-                .withOwnerReferences(owner(database))
-            .endMetadata()
-            .withNewSpec()
-                .withServiceName(name)
-                .withReplicas(1)
-                .withNewSelector()
-                    .addToMatchLabels("app", name)
-                .endSelector()
-                .withNewTemplate()
-                    .withNewMetadata()
-                        .addToLabels("app", name)
-                    .endMetadata()
-                    .withNewSpec()
-                        .addNewContainer()
-                            .withName(POSTGRES)
-                            .withImage("postgres:" + version)
-                            .addNewEnv()
-                                .withName("POSTGRES_DB")
-                                .withValue(name)
-                            .endEnv()
-                            .addNewEnv()
-                                .withName("POSTGRES_USER")
-                                .withNewValueFrom()
-                                    .withNewSecretKeyRef("POSTGRES_USER", secretName, false)
-                                .endValueFrom()
-                            .endEnv()
-                            .addNewEnv()
-                                .withName("POSTGRES_PASSWORD")
-                                .withNewValueFrom()
-                                    .withNewSecretKeyRef("POSTGRES_PASSWORD", secretName, false)
-                                .endValueFrom()
-                            .endEnv()
-                            .addNewPort()
-                                .withContainerPort(port)
-                            .endPort()
-                        .endContainer()
-                    .endSpec()
-                .endTemplate()
-            .endSpec()
-            .build();
-
-        client.resource(ss).serverSideApply();
-        log.debug("StatefulSet created successfully");
     }
 }
