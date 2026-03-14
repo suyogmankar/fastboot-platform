@@ -44,9 +44,6 @@ platform:
 
 platformServices:
   databases:
-    - name: postgres-db
+    - databaseName: postgres-db
       type: postgres
       version: "15"
-      port: 5432
-      secretName: postgres-secret
-      storage: 10Gi

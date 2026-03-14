@@ -1,5 +1,7 @@
 package io.platform.controllers;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -9,7 +11,7 @@ import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.platform.crds.database.Database;
 import io.platform.crds.platform.Platform;
-import io.platform.services.database.DatabaseProvisionerRegistry;
+import io.platform.services.database.DatabaseService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -17,31 +19,26 @@ import lombok.extern.slf4j.Slf4j;
 @ControllerConfiguration
 public class DatabaseController implements Reconciler<Database> {
 
-    private final DatabaseProvisionerRegistry databaseProvisionerRegistry;
     private final KubernetesClient client;
+    private final DatabaseService databaseService;
 
-    public DatabaseController(DatabaseProvisionerRegistry databaseProvisionerRegistry,KubernetesClient client) {
-        this.databaseProvisionerRegistry = databaseProvisionerRegistry;
+    public DatabaseController(KubernetesClient client, DatabaseService databaseService) {
         this.client = client;
+        this.databaseService = databaseService;
     }
 
     @Override
     public UpdateControl<Database> reconcile(Database database, Context context) {
-        log.info("----------Database reconciler----------");
-
+        log.info("----------[Database reconciler started]----------");
         String namespace = database.getMetadata().getNamespace();
 
-        Platform platform = client.resources(Platform.class)
+        Optional<Platform> optionalPlatform = client.resources(Platform.class)
             .inNamespace(namespace)
             .list()
             .getItems()
             .stream()
-            .findFirst()
-            .orElse(null);
-
-        databaseProvisionerRegistry
-            .getProvisioner(database)
-            .provision(platform, database);
+            .findFirst();
+        optionalPlatform.ifPresent(platform -> databaseService.provisionDatabase(platform, database));
 
         return UpdateControl.noUpdate();
     }

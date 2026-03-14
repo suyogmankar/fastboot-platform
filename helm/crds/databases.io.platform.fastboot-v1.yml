@@ -19,10 +19,10 @@ spec:
         properties:
           spec:
             properties:
+              databaseName:
+                type: string
               externalAccess:
                 type: boolean
-              name:
-                type: string
               port:
                 type: integer
               secretName:
