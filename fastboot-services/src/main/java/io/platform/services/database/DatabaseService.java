@@ -2,6 +2,7 @@ package io.platform.services.database;
 
 import org.springframework.stereotype.Service;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.platform.crds.database.Database;
@@ -21,35 +22,48 @@ public class DatabaseService {
         this.databaseProvisionerRegistry = databaseProvisionerRegistry;
     }
 
-    public void createDatabaseCustomResource(Platform platform) {
-        String namespace = platform.getMetadata().getNamespace();
-        var databases = platform.getSpec().getServices().getDatabases();
+    public void createDatabaseResource(String namespace,
+                                   String databaseName,
+                                   DatabaseSpec dbSpec,
+                                   HasMetadata owner) {
+        Database existing = client.resources(Database.class)
+            .inNamespace(namespace)
+            .withName(databaseName)
+            .get();
 
-        for (DatabaseSpec dbSpec : databases) {
-            Database existing = client.resources(Database.class)
-                .inNamespace(namespace)
-                .withName(dbSpec.getDatabaseName())
-                .get();
-
-            if (existing != null) {
-                log.info("Database CR {} already exists", dbSpec.getDatabaseName());
-                continue;
-            }
-
-            Database database = new Database();
-            database.setMetadata(new ObjectMeta());
-            database.getMetadata().setName(dbSpec.getDatabaseName());
-            database.getMetadata().setNamespace(namespace);
-
-            database.setSpec(dbSpec);
-            database.addOwnerReference(platform);
-
-            client.resources(Database.class)
-                .inNamespace(namespace)
-                .resource(database)
-                .create();
-            log.info("Database Custom Resource: {} is successfully created", dbSpec.getDatabaseName());
+        if (existing != null) {
+            log.info("Database CR {} already exists", databaseName);
+            return;
         }
+
+        Database database = new Database();
+        database.setMetadata(new ObjectMeta());
+        database.getMetadata().setName(databaseName);
+        database.getMetadata().setNamespace(namespace);
+
+        database.setSpec(dbSpec);
+        database.addOwnerReference(owner);
+
+        client.resources(Database.class)
+            .inNamespace(namespace)
+            .resource(database)
+            .create();
+
+        log.info("Database Custom Resource {} created successfully", databaseName);
+    }
+
+    public void createDatabaseResourceFromPlatform(Platform platform) {
+       String namespace = platform.getMetadata().getNamespace();
+       var databases = platform.getSpec().getServices().getDatabases();
+
+       for (DatabaseSpec dbSpec : databases) {
+           createDatabaseResource(
+                namespace,
+                dbSpec.getDatabaseName(),
+                dbSpec,
+                platform
+           );
+       }
     }
 
     public void provisionDatabase(Platform platform, Database database) {

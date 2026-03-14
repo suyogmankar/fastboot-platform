@@ -12,7 +12,7 @@ metadata:
 rules:
   # Custom resources in group io.platform.fastboot
   - apiGroups: ["io.platform.fastboot"]
-    resources: ["platforms","databases"]
+    resources: ["platforms","databases","databaseclaims"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
   # Tekton resources

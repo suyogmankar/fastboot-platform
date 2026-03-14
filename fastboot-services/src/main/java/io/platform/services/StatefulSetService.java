@@ -1,4 +1,4 @@
-package io.platform.services.database;
+package io.platform.services;
 
 import static io.platform.services.utils.KubernetesResourceUtils.owner;
 

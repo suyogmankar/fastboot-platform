@@ -1,4 +1,4 @@
-package io.platform.services.database;
+package io.platform.services;
 
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;

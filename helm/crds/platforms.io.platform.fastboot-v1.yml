@@ -25,6 +25,17 @@ spec:
                     properties:
                       externalAccess:
                         type: boolean
+                      sizes:
+                        additionalProperties:
+                          properties:
+                            cpu:
+                              type: string
+                            memory:
+                              type: string
+                            storage:
+                              type: string
+                          type: object
+                        type: object
                       storage:
                         type: string
                       storageClass:
@@ -44,7 +55,11 @@ spec:
                           type: boolean
                         port:
                           type: integer
-                        secretName:
+                        size:
+                          enum:
+                          - LARGE
+                          - MEDIUM
+                          - SMALL
                           type: string
                         storage:
                           type: string

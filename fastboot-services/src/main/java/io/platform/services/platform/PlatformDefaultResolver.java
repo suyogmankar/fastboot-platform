@@ -2,6 +2,8 @@ package io.platform.services.platform;
 
 import org.springframework.stereotype.Component;
 
+import io.platform.core.database.DatabaseSize;
+import io.platform.core.database.DatabaseSizeProfile;
 import io.platform.crds.database.Database;
 import io.platform.crds.database.DatabaseDefaults;
 import io.platform.crds.platform.Platform;
@@ -13,17 +15,28 @@ public class PlatformDefaultResolver {
 
     public Database applyDatabaseDefaults(Platform platform, Database database) {
 
-        String storage = database.getSpec().getStorage();
-        String storageClass = database.getSpec().getStorageClass();
-        Boolean externalAccess = database.getSpec().getExternalAccess();
+        DatabaseDefaults defaults = platform.getSpec().getDefaults().getDatabase();
 
-        DatabaseDefaults databaseDefaults = platform.getSpec()
-            .getDefaults()
-            .getDatabase();
+        if (database.getSpec().getSize() != null && defaults.getSizes() != null) {
+            DatabaseSize size = database.getSpec().getSize();
+            DatabaseSizeProfile profile = defaults.getSizes().get(size);
 
-        database.getSpec().setStorage(storage == null ? databaseDefaults.getStorage() : storage);
-        database.getSpec().setStorageClass(storageClass == null ? databaseDefaults.getStorageClass() : storageClass);
-        database.getSpec().setExternalAccess(externalAccess == null ? databaseDefaults.getExternalAccess() : externalAccess);
+            if (profile != null) {
+                database.getSpec().setStorage(profile.getStorage());
+            }
+        }
+
+        if (database.getSpec().getStorage() == null) {
+            database.getSpec().setStorage(defaults.getStorage());
+        }
+
+        if (database.getSpec().getStorageClass() == null) {
+            database.getSpec().setStorageClass(defaults.getStorageClass());
+        }
+
+        if (database.getSpec().getExternalAccess() == null) {
+            database.getSpec().setExternalAccess(defaults.getExternalAccess());
+        }
         return database;
     }
 }
