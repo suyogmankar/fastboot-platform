@@ -12,13 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 public class PlatformDefaultResolver {
 
     public Database applyDatabaseDefaults(Platform platform, Database database) {
-        if (platform == null || platform.getSpec().getDefaults() == null || platform.getSpec().getDefaults().getDatabase() == null) {
-            return null;
-        }
 
         String storage = database.getSpec().getStorage();
         String storageClass = database.getSpec().getStorageClass();
         Boolean externalAccess = database.getSpec().getExternalAccess();
+
         DatabaseDefaults databaseDefaults = platform.getSpec()
             .getDefaults()
             .getDatabase();

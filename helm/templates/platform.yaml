@@ -16,12 +16,17 @@ spec:
 
   services:
     databases:
+    {{- if .Values.platformServices.databases }}
     {{- range .Values.platformServices.databases }}
-      - name: {{ .name }}
+      - databaseName: {{ .databaseName }}
         type: {{ .type }}
         version: {{ .version | quote }}
+        {{- if hasKey . "port" }}
         port: {{ .port }}
+        {{- end }}
+        {{- if hasKey . "secretName" }}
         secretName: {{ .secretName }}
+        {{- end }}
         {{- if hasKey . "storage" }}
         storage: {{ .storage }}
         {{- else }}
@@ -37,4 +42,7 @@ spec:
         {{- else }}
         externalAccess: {{ $.Values.platform.defaults.database.externalAccess }}
         {{- end }}
+    {{- end }}
+    {{- else }}
+      []
     {{- end }}

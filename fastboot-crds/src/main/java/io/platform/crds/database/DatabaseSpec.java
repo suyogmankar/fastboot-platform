@@ -6,11 +6,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DatabaseSpec {
-    private String name;
+
+    private String databaseName;
     private String type;
     private String version;
-    private int port;
+    private Integer port;
     private String secretName;
+
+    // Storage
     private String storage;
     private String storageClass;
     private Boolean externalAccess;
