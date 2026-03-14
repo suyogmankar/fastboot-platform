@@ -33,7 +33,7 @@ public class PlatformController implements Reconciler<Platform> {
 
         var databases = platformServices.getDatabases();
         if (databases != null && !databases.isEmpty()){
-            databaseService.createDatabaseCustomResource(platform);
+            databaseService.createDatabaseResourceFromPlatform(platform);
         } else log.info("No Database is configured!!!!");
 
         return UpdateControl.noUpdate();

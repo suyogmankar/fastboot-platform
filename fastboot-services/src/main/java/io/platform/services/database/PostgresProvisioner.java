@@ -8,6 +8,9 @@ import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.platform.crds.database.Database;
 import io.platform.crds.platform.Platform;
+import io.platform.services.DNSService;
+import io.platform.services.SecretService;
+import io.platform.services.StatefulSetService;
 import io.platform.services.platform.PlatformDefaultResolver;
 import lombok.extern.slf4j.Slf4j;
 

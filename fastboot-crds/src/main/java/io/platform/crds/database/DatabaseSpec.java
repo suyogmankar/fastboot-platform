@@ -1,5 +1,6 @@
 package io.platform.crds.database;
 
+import io.platform.core.database.DatabaseSize;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,10 +12,10 @@ public class DatabaseSpec {
     private String type;
     private String version;
     private Integer port;
-    private String secretName;
 
     // Storage
     private String storage;
     private String storageClass;
     private Boolean externalAccess;
+    private DatabaseSize size;
 }

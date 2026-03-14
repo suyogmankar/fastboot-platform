@@ -38,12 +38,21 @@ platform:
   version: 1.0.0
   defaults:
     database:
-      storage: 5Gi
       storageClass: local-path
       externalAccess: true
+      sizes:
+        SMALL:
+          storage: 5Gi
+          cpu: 250m
+          memory: 512Mi
+        MEDIUM:
+          storage: 10Gi
+          cpu: 500m
+          memory: 1Gi
+        LARGE:
+          storage: 50Gi
+          cpu: 1000m
+          memory: 2Gi
 
 platformServices:
-  databases:
-    - databaseName: postgres-db
-      type: postgres
-      version: "15"
+  databases: []

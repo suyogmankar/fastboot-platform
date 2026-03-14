@@ -10,9 +10,10 @@ spec:
 
   defaults:
     database:
-      storage: {{ .Values.platform.defaults.database.storage }}
       storageClass: {{ .Values.platform.defaults.database.storageClass }}
       externalAccess: {{ .Values.platform.defaults.database.externalAccess }}
+      sizes:
+      {{ toYaml .Values.platform.defaults.database.sizes | nindent 8 }}
 
   services:
     databases:
@@ -24,13 +25,8 @@ spec:
         {{- if hasKey . "port" }}
         port: {{ .port }}
         {{- end }}
-        {{- if hasKey . "secretName" }}
-        secretName: {{ .secretName }}
-        {{- end }}
-        {{- if hasKey . "storage" }}
-        storage: {{ .storage }}
-        {{- else }}
-        storage: {{ $.Values.platform.defaults.database.storage }}
+        {{- if hasKey . "size" }}
+        size: {{ .size }}
         {{- end }}
         {{- if hasKey . "storageClass" }}
         storageClass: {{ .storageClass }}

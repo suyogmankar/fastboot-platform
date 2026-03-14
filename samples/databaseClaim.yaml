@@ -1,0 +1,8 @@
+apiVersion: io.platform.fastboot/v1alpha1
+kind: DatabaseClaim
+metadata:
+  name: postgres-db
+spec:
+  engine: postgres
+  version: "15"
+  size: SMALL

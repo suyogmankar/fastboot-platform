@@ -1,4 +1,4 @@
-package io.platform.services.database;
+package io.platform.services;
 
 import java.util.Map;
 import java.util.UUID;
